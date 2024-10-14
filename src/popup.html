@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Paragraph Search</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Describe the webpage</h2>
+        <h3>Enter a paragraph and click search to find the top 3 most relevant pages you've browsed before</h3>
+        <textarea id="paragraphInput" placeholder="Type your paragraph here..." rows="6"></textarea>
+        <button id="searchButton">Search</button>
+        <div id="loading" class="hidden">
+            <p>Loading...</p>
+        </div>
+        <div id="results" class="hidden">
+            <h3>Top 3 Results:</h3>
+            <ul id="resultsList"></ul>
+        </div>
+
+    </div>
+
+    <script type="module" src="popup.js"></script>
+</body>
+</html>

@@ -1,14 +1,20 @@
-import { OPENAI_API_KEY } from './cred.js';
+import { fetchEmbeddings } from './embedder.js';
 
 function handleResponse(embeddingRes, pageInfo) {
-  console.log('API Response for URL:', pageInfo.url);
+  console.log('Handling API Response for URL:', pageInfo.url);
+
+  // if notdefined
+  if (!embeddingRes || !embeddingRes.data || embeddingRes.data.length === 0) {
+    console.error('Embedding response is undefined');
+    return;
+  }
   
   const embedding = embeddingRes.data[0].embedding;
 
   // Store data
   chrome.storage.local.get(["embeddedWebPages"], (result) => {
         const embeddedWebPages = result.embeddedWebPages || [];
-        embeddedWebPages.push({embedding: embedding, URL: pageInfo.url } );
+        embeddedWebPages.push({embedding: embedding, URL: pageInfo.url, title: pageInfo.title } );
 
         chrome.storage.local.set({ embeddedWebPages }, () => {
           if (chrome.runtime.lastError) {
@@ -21,54 +27,9 @@ function handleResponse(embeddingRes, pageInfo) {
 }
 
 
-async function fetchEmbeddings( pageInfo ) {
-  console.log('fetchEmbeddings called', pageInfo.url);
-  const url = 'https://api.openai.com/v1/embeddings';
-  
-  const requestOptions = {
-    method: 'POST', // This is a POST request, not GET
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      input: pageInfo.content,
-      model: "text-embedding-3-small"
-    })
-  };
-
-  try {
-    console.log('Fetching embeddings for URL:', pageInfo.url);
-    const response = await fetch(url, requestOptions);
-
-    // Check if response is OK
-    if (!response.ok) {
-      console.error('API Error:', response.status, response.statusText);
-      return;
-    }
-
-    // Check if the response is JSON
-    const contentType = response.headers.get('Content-Type');
-    if (contentType && contentType.includes('application/json')) {
-      const data = await response.json();
-      handleResponse(data, pageInfo);
-    } else {
-      // Handle non-JSON response
-      const text = await response.text();
-      console.error('Unexpected response format:', text);
-    }
-
-  } catch (error) {
-    console.error('Error fetching embeddings:', error);
-  }
-}
-
-
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
-    console.log(OPENAI_API_KEY)
-
     console.log("Listener called for URL: ", tab.url);
 
     chrome.scripting.executeScript({
@@ -88,13 +49,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 function extractPageData() {
 
   console.log("Extract Page Data")
-
-  // TODO actually extract the relevant text
+  // TODO actually extract the relevant text / permalinks of relevant content
   const pageInfo = {
     title: document.title,
     url: window.location.href,
     content: document.body.innerText.slice(0, 500)  // example: first 500 characters
   };
+
+  // Check if content is already stored.
 
   // Send data to background script
   chrome.runtime.sendMessage({ action: "storeData", data: pageInfo });
@@ -104,6 +66,8 @@ function extractPageData() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Message received in background script:", message);
   if (message.action === "storeData") {
-      fetchEmbeddings(message.data);
-  }
+      fetchEmbeddings(message.data).then(embeddingResp => {
+        handleResponse(embeddingResp, message.data);
+      }
+  )}
 });
