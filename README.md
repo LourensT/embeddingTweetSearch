@@ -1,7 +1,8 @@
 # Browser History Search with Semantic Embeddings (WIP)
 
 Current state: super minimal prototype. Probably will make this specific for twitter search.
-![Pop up preview](popup.png)
+
+<img src="https://github.com/LourensT/histsearch/blob/master/popup.PNG" alt="Pop up preview" width="350"/>
 
 ## Setup and install
 1. Set `cred.js` in `src` folder with the following content
