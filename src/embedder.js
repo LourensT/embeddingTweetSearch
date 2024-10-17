@@ -1,7 +1,6 @@
 import { OPENAI_API_KEY } from './cred.js';
 
-export async function fetchEmbeddings( pageInfo ) {
-  console.log('fetchEmbeddings called', pageInfo.url);
+export async function fetchEmbeddings( some_text ) {
   const url = 'https://api.openai.com/v1/embeddings';
   
   const requestOptions = {
@@ -11,13 +10,12 @@ export async function fetchEmbeddings( pageInfo ) {
       'Authorization': `Bearer ${OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      input: pageInfo.content,
+      input: some_text,
       model: "text-embedding-3-small"
     })
   };
 
   try {
-    console.log('Fetching embeddings for URL:', pageInfo.url);
     const response = await fetch(url, requestOptions);
 
     // Check if response is OK
