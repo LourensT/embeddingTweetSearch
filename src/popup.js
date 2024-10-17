@@ -23,7 +23,7 @@ function performSearch() {
     const paragraphInput = document.getElementById('paragraphInput').value.trim();
 
     if (paragraphInput) {
-        fetchEmbeddings({ content: paragraphInput, url: "Typed Paragraph" })
+        fetchEmbeddings(paragraphInput)
             .then(embeddingResp => {
                 const embedding = embeddingResp.data[0].embedding;
 
