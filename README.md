@@ -1,6 +1,6 @@
-# Browser History Search with Semantic Embeddings (WIP)
+# Search Tweets you've seen with Semantic Embeddings (WIP)
 
-Current state: super minimal prototype. Probably will make this specific for twitter search.
+Current state: super minimal prototype. 
 
 <img src="https://github.com/LourensT/histsearch/blob/master/popup.PNG" alt="Pop up preview" width="350"/>
 
@@ -23,3 +23,11 @@ Then go to
 * `chrome-extension://\<id\>/manifest.json`
 
 and inspect the storage in the right-most tab.
+
+## To do
+- [ ] Only add tweets that are actually displayed instead of _all_ that are loaded by timeline
+- [ ] Test how replies are handled
+- [ ] Test how quoted tweets are handled
+- [ ] Test how retweets are handled
+- [ ] Include support for replies
+- [ ] In the search results show who tweeted it instead of only text, and the cosim score
