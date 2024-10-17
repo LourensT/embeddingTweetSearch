@@ -82,6 +82,7 @@ function displayResults(results) {
         link.textContent = counter + ". " + result.title;
         listItem.appendChild(link);
         resultsList.appendChild(listItem);
+        counter++;
     });
 
     const resultsDiv = document.getElementById('results');
