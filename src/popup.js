@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-function getEmbeddedWebPages(callback) {
-    chrome.storage.local.get(["embeddedWebPages"], (result) => {
-        const embeddedWebPages = result.embeddedWebPages || [];
-        callback(embeddedWebPages);
+function getEmbeddedTweets(callback) {
+    chrome.storage.local.get(["embeddedTweets"], (result) => {
+        const embeddedTweets = result.embeddedTweets || [];
+        callback(embeddedTweets);
     });
 }
 
@@ -28,25 +28,35 @@ function performSearch() {
                 const embedding = embeddingResp.data[0].embedding;
 
                 // Fetch embedded web pages using a callback
-                getEmbeddedWebPages(embeddedWebPages => {
-                    const similarities = [];
-                    embeddedWebPages.forEach(page => {
-                        similarities.push(cosinesim(embedding, page.embedding));
-                    });
+                getEmbeddedTweets(embeddedTweets => {
+                    console.log('Embedded tweets');
+                    const similarities = {};
+                    // set cutoff to minimum similarity
+                    for (const [url, tweet] of Object.entries(embeddedTweets)) {
+                        similarities[url] = cosinesim(embedding, tweet.embedding);
+                    }
+                    console.log('Similarities:', similarities);
 
-                    // Process similarities, find top results, and display them
-                    const numResults = Math.min(3, embeddedWebPages.length);
-                    const indices = similarities.map((e, i) => i)
-                        .sort((a, b) => similarities[a] - similarities[b])
-                        .slice(0, numResults);
 
-                    const results = indices.map(index => ({
-                        title: embeddedWebPages[index].title,
-                        url: embeddedWebPages[index].URL
+                    const entries = Object.entries(similarities);
+                    console.log('length:', embeddedTweets.length);
+
+                    let numResults;
+                    if(Object.keys(embeddedTweets).length < 3){
+                        numResults = Object.keys(embeddedTweets).length;
+                    } else {
+                        numResults = 3;
+                    }
+                    
+                    entries.sort((a, b) => b[1] - a[1]);
+
+                    // Get the top 3 entries
+                    const topThree = entries.slice(0, numResults);
+                    console.log('Top three:', topThree);
+                    const results = topThree.map(top => ({
+                        title: embeddedTweets[top[0]].text.slice(0, 50) + '...',
+                        url: top[0]
                     }));
-
-                    console.log('Results from search:', results);
-
                     displayResults(results);
                 });
             })
